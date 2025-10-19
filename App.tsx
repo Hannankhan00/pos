@@ -1,6 +1,8 @@
 
 import React from 'react';
-import { AppProvider, useAppContext } from './context/AppContext';
+// FIX: `useAppContext` is exported from `hooks/useAppContext`, not `context/AppContext`.
+import { AppProvider } from './context/AppContext';
+import { useAppContext } from './hooks/useAppContext';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { DashboardScreen } from './screens/DashboardScreen';
