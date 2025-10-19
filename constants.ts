@@ -1,42 +1,37 @@
-import type { MenuItem, Table, StockItem } from './types';
-import { TableStatus } from './types';
+import { MenuItem, StockItem, Table, TableStatus, Order, OrderStatus } from './types';
 
-export const INITIAL_MENU_CATEGORIES: string[] = ['Appetizers', 'Main Courses', 'Desserts', 'Beverages'];
+export const MENU_CATEGORIES = ['Burgers', 'Sides', 'Drinks', 'Desserts'];
 
 export const INITIAL_STOCK: StockItem[] = [
-    { id: 's1', name: 'Angus Beef Patty', quantity: 100, unit: 'patties', lowStockThreshold: 20 },
-    { id: 's2', name: 'Brioche Buns', quantity: 120, unit: 'buns', lowStockThreshold: 30 },
-    { id: 's3', name: 'Cheddar Cheese', quantity: 80, unit: 'slices', lowStockThreshold: 25 },
-    { id: 's4', name: 'Lettuce', quantity: 50, unit: 'heads', lowStockThreshold: 10 },
-    { id: 's5', name: 'Tomato', quantity: 60, unit: 'units', lowStockThreshold: 15 },
-    { id: 's6', name: 'Potatoes', quantity: 200, unit: 'kg', lowStockThreshold: 20 },
-    { id: 's7', name: 'Salmon Fillet', quantity: 40, unit: 'fillets', lowStockThreshold: 10 },
-    { id: 's8', name: 'Asparagus', quantity: 30, unit: 'bunches', lowStockThreshold: 5 },
-    { id: 's9', name: 'Chocolate Lava Cake Mix', quantity: 50, unit: 'servings', lowStockThreshold: 10 },
-    { id: 's10', name: 'Vanilla Ice Cream', quantity: 20, unit: 'liters', lowStockThreshold: 5 },
-    { id: 's11', name: 'Cola', quantity: 200, unit: 'cans', lowStockThreshold: 50 },
-    { id: 's12', name: 'Lemonade', quantity: 150, unit: 'cans', lowStockThreshold: 40 },
+  { id: 's-1', name: 'Beef Patty', quantity: 50, unit: 'patties', lowStockThreshold: 20 },
+  { id: 's-2', name: 'Burger Bun', quantity: 80, unit: 'buns', lowStockThreshold: 30 },
+  { id: 's-3', name: 'Potatoes', quantity: 20, unit: 'kg', lowStockThreshold: 10 },
+  { id: 's-4', name: 'Cheddar Cheese', quantity: 10, unit: 'kg', lowStockThreshold: 5 },
+  { id: 's-5', name: 'Lettuce', quantity: 5, unit: 'heads', lowStockThreshold: 3 },
+  { id: 's-6', name: 'Tomatoes', quantity: 10, unit: 'kg', lowStockThreshold: 5 },
+  { id: 's-7', name: 'Cola Can', quantity: 100, unit: 'cans', lowStockThreshold: 40 },
+  { id: 's-8', name: 'Vanilla Ice Cream', quantity: 15, unit: 'liters', lowStockThreshold: 5 },
 ];
 
-export const INITIAL_MENU_ITEMS: MenuItem[] = [
-  { id: 'm1', name: 'Classic Burger', price: 12.99, category: 'Main Courses', description: 'Juicy Angus beef patty with cheddar cheese, lettuce, and tomato on a brioche bun.', imageUrl: 'https://picsum.photos/seed/burger/400/300', stockItemId: 's1', stockRequired: 1 },
-  { id: 'm2', name: 'Fries', price: 4.99, category: 'Appetizers', description: 'Crispy golden fries, lightly salted.', imageUrl: 'https://picsum.photos/seed/fries/400/300', stockItemId: 's6', stockRequired: 0.25 },
-  { id: 'm3', 'name': 'Grilled Salmon', price: 22.50, category: 'Main Courses', description: 'Perfectly grilled salmon fillet served with a side of steamed asparagus.', imageUrl: 'https://picsum.photos/seed/salmon/400/300', stockItemId: 's7', stockRequired: 1 },
-  { id: 'm4', 'name': 'Chocolate Lava Cake', price: 8.99, category: 'Desserts', description: 'Warm chocolate cake with a gooey molten center, served with vanilla ice cream.', imageUrl: 'https://picsum.photos/seed/cake/400/300', stockItemId: 's9', stockRequired: 1 },
-  { id: 'm5', 'name': 'Cola', price: 2.50, category: 'Beverages', description: 'A refreshing can of cola.', imageUrl: 'https://picsum.photos/seed/cola/400/300', stockItemId: 's11', stockRequired: 1 },
-  { id: 'm6', 'name': 'Lemonade', price: 2.75, category: 'Beverages', description: 'Freshly squeezed lemonade.', imageUrl: 'https://picsum.photos/seed/lemonade/400/300', stockItemId: 's12', stockRequired: 1 },
-  { id: 'm7', 'name': 'Caesar Salad', price: 10.50, category: 'Appetizers', description: 'Crisp romaine lettuce, parmesan cheese, croutons, and Caesar dressing.', imageUrl: 'https://picsum.photos/seed/salad/400/300', stockItemId: 's4', stockRequired: 0.5 },
+export const INITIAL_MENU: MenuItem[] = [
+  { id: 'm-1', name: 'Classic Burger', price: 9.99, category: 'Burgers', description: 'A juicy beef patty with cheddar cheese, lettuce, and tomato.', imageUrl: 'https://picsum.photos/seed/burger1/400/300', stockItemId: 's-1', stockRequired: 1 },
+  { id: 'm-2', name: 'Double Cheeseburger', price: 12.99, category: 'Burgers', description: 'Two beef patties for the extra hungry.', imageUrl: 'https://picsum.photos/seed/burger2/400/300', stockItemId: 's-1', stockRequired: 2 },
+  { id: 'm-3', name: 'Fries', price: 3.99, category: 'Sides', description: 'Crispy golden french fries.', imageUrl: 'https://picsum.photos/seed/fries/400/300', stockItemId: 's-3', stockRequired: 0.3 },
+  { id: 'm-4', name: 'Cola', price: 1.99, category: 'Drinks', description: 'A refreshing can of cola.', imageUrl: 'https://picsum.photos/seed/cola/400/300', stockItemId: 's-7', stockRequired: 1 },
+  { id: 'm-5', name: 'Vanilla Shake', price: 4.99, category: 'Desserts', description: 'A classic vanilla milkshake.', imageUrl: 'https://picsum.photos/seed/shake/400/300', stockItemId: 's-8', stockRequired: 0.2 },
 ];
 
 export const INITIAL_TABLES: Table[] = [
-  { id: 't1', name: 'Table 1', capacity: 4, status: TableStatus.AVAILABLE },
-  { id: 't2', name: 'Table 2', capacity: 4, status: TableStatus.AVAILABLE },
-  { id: 't3', name: 'Table 3', capacity: 2, status: TableStatus.AVAILABLE },
-  { id: 't4', name: 'Table 4', capacity: 2, status: TableStatus.AVAILABLE },
-  { id: 't5', name: 'Table 5', capacity: 6, status: TableStatus.AVAILABLE },
-  { id: 't6', name: 'Table 6', capacity: 6, status: TableStatus.AVAILABLE },
-  { id: 't7', name: 'Bar 1', capacity: 1, status: TableStatus.AVAILABLE },
-  { id: 't8', name: 'Bar 2', capacity: 1, status: TableStatus.AVAILABLE },
-  { id: 't9', name: 'Patio 1', capacity: 4, status: TableStatus.AVAILABLE },
-  { id: 't10', name: 'Patio 2', capacity: 4, status: TableStatus.AVAILABLE },
+  { id: 't-1', name: 'Table 1', capacity: 2, status: TableStatus.AVAILABLE },
+  { id: 't-2', name: 'Table 2', capacity: 4, status: TableStatus.OCCUPIED },
+  { id: 't-3', name: 'Table 3', capacity: 4, status: TableStatus.AVAILABLE },
+  { id: 't-4', name: 'Table 4', capacity: 6, status: TableStatus.NEEDS_BILLING },
+  { id: 't-5', name: 'Patio 1', capacity: 4, status: TableStatus.AVAILABLE },
+];
+
+export const INITIAL_ORDERS: Order[] = [
+    { id: 'o-1', tableId: 't-2', items: [{ menuItemId: 'm-1', quantity: 2 }, { menuItemId: 'm-3', quantity: 1 }], status: OrderStatus.PREPARING, total: 23.97, createdAt: new Date(Date.now() - 5 * 60000).toISOString() },
+    { id: 'o-2', tableId: 't-4', items: [{ menuItemId: 'm-2', quantity: 1 }], status: OrderStatus.SERVED, total: 12.99, createdAt: new Date(Date.now() - 20 * 60000).toISOString() },
+    { id: 'o-3', tableId: 'takeout-1', items: [{ menuItemId: 'm-4', quantity: 4 }], status: OrderStatus.READY, total: 7.96, createdAt: new Date(Date.now() - 2 * 60000).toISOString() },
+    { id: 'o-4', tableId: 't-2', items: [{ menuItemId: 'm-5', quantity: 2 }], status: OrderStatus.PENDING, total: 9.98, createdAt: new Date(Date.now() - 1 * 60000).toISOString() },
 ];

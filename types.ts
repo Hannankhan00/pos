@@ -1,65 +1,56 @@
 export enum OrderStatus {
-  PENDING = 'Pending',
-  PREPARING = 'Preparing',
-  READY = 'Ready',
-  SERVED = 'Served',
-  PAID = 'Paid',
-  CANCELLED = 'Cancelled',
+    PENDING = 'Pending',
+    PREPARING = 'Preparing',
+    READY = 'Ready',
+    SERVED = 'Served',
+    PAID = 'Paid',
+    CANCELLED = 'Cancelled',
 }
 
 export enum TableStatus {
-  AVAILABLE = 'Available',
-  OCCUPIED = 'Occupied',
-  NEEDS_BILLING = 'Needs Billing',
-}
-
-export enum Screen {
-    DASHBOARD = 'Dashboard',
-    ORDERS = 'Orders',
-    TABLES = 'Tables',
-    KITCHEN = 'Kitchen',
-    MENU = 'Menu',
-    STOCK = 'Stock',
-}
-
-export interface MenuItem {
-  id: string;
-  name: string;
-  price: number;
-  category: string;
-  description: string;
-  imageUrl: string;
-  stockItemId: string;
-  stockRequired: number;
+    AVAILABLE = 'Available',
+    OCCUPIED = 'Occupied',
+    NEEDS_BILLING = 'Needs Billing',
 }
 
 export interface OrderItem {
-  menuItemId: string;
-  quantity: number;
-  notes?: string;
+    menuItemId: string;
+    quantity: number;
 }
 
 export interface Order {
-  id: string;
-  tableId: string;
-  items: OrderItem[];
-  status: OrderStatus;
-  total: number;
-  createdAt: Date;
+    id: string;
+    tableId: string; // "takeout" or a table ID
+    items: OrderItem[];
+    status: OrderStatus;
+    total: number;
+    createdAt: string; // ISO string
 }
 
-export interface Table {
-  id: string;
-  name: string;
-  capacity: number;
-  status: TableStatus;
-  orderId?: string;
+export interface MenuItem {
+    id: string;
+    name: string;
+    price: number;
+    category: string;
+    description: string;
+    imageUrl: string;
+    stockItemId?: string; // Optional link to a stock item
+    stockRequired: number; // How many units of stock this item consumes
 }
 
 export interface StockItem {
-  id: string;
-  name: string;
-  quantity: number;
-  unit: string;
-  lowStockThreshold: number;
+    id: string;
+    name: string;
+    quantity: number;
+    unit: string; // e.g., 'kg', 'bottles', 'patties'
+    lowStockThreshold: number;
 }
+
+export interface Table {
+    id: string;
+    name: string;
+    capacity: number;
+    status: TableStatus;
+}
+
+export type Screen = 'Dashboard' | 'Orders' | 'Kitchen' | 'Menu' | 'Stock' | 'Tables' | 'Staff' | 'Customers';
