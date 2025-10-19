@@ -1,10 +1,10 @@
+
 export enum OrderStatus {
     PENDING = 'Pending',
     PREPARING = 'Preparing',
     READY = 'Ready',
     SERVED = 'Served',
     PAID = 'Paid',
-    CANCELLED = 'Cancelled',
 }
 
 export enum TableStatus {
@@ -20,10 +20,10 @@ export interface OrderItem {
 
 export interface Order {
     id: string;
-    tableId: string; // "takeout" or a table ID
+    tableId: string; // 'takeout' or a table id
     items: OrderItem[];
-    status: OrderStatus;
     total: number;
+    status: OrderStatus;
     createdAt: string; // ISO string
 }
 
@@ -52,5 +52,3 @@ export interface Table {
     capacity: number;
     status: TableStatus;
 }
-
-export type Screen = 'Dashboard' | 'Orders' | 'Kitchen' | 'Menu' | 'Stock' | 'Tables' | 'Staff' | 'Customers';
