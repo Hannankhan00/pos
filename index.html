@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF--8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Restaurant POS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Poppins', 'sans-serif'],
+            },
+            colors: {
+              primary: '#3b82f6', // A modern, friendly blue
+              secondary: '#10b981', // A vibrant green for accents
+              background: '#0f172a', // A deep, professional navy
+              surface: '#1e293b', // A slightly lighter navy for cards
+              'surface-light': '#334155', // For hover states
+              'text-primary': '#f1f5f9', // A clean, bright white
+              'text-secondary': '#94a3b8', // A softer gray for subtitles
+              danger: '#ef4444', // A clear red for delete actions
+            }
+          }
+        }
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "recharts": "https://aistudiocdn.com/recharts@^3.3.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.25.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0"
+  }
+}
+</script>
+</head>
+  <body class="bg-background text-text-primary font-sans">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,5 @@
+{
+  "name": "Copy of AI Restaurant POS",
+  "description": "A full-fledged, AI-powered Point of Sale (POS) system for restaurants. It includes modules for order taking, table management, menu management, stock control, kitchen display, billing, and a customer-facing ordering portal, all enhanced with generative AI features.",
+  "requestFramePermissions": []
+}
