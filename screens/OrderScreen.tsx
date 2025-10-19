@@ -1,147 +1,150 @@
+
 import React, { useState, useMemo } from 'react';
 import { useAppContext } from '../hooks/useAppContext';
-import type { MenuItem, OrderItem } from '../types';
-import { TableStatus, Screen } from '../types';
-import { getOrderSuggestion } from '../services/geminiService';
+import { MenuItem, OrderItem, TableStatus } from '../types';
+import { PageTitle } from '../components/PageTitle';
 
-const MenuItemCard: React.FC<{ item: MenuItem; onAddToOrder: (item: MenuItem) => void }> = ({ item, onAddToOrder }) => (
-    <div onClick={() => onAddToOrder(item)} className="bg-surface rounded-lg p-3 flex flex-col cursor-pointer hover:ring-2 ring-primary transition-all duration-200">
-        <img src={item.imageUrl} alt={item.name} className="w-full h-24 object-cover rounded-md mb-2" />
-        <h3 className="font-semibold text-sm flex-grow text-text-primary">{item.name}</h3>
-        <p className="text-secondary font-bold text-sm mt-1">${item.price.toFixed(2)}</p>
+const MenuItemCard: React.FC<{ item: MenuItem; onAdd: () => void; }> = ({ item, onAdd }) => (
+    <div className="bg-surface p-4 rounded-xl flex space-x-4 items-center shadow-md">
+        <img src={item.imageUrl} alt={item.name} className="w-20 h-20 object-cover rounded-lg" />
+        <div className="flex-grow">
+            <p className="font-bold text-text-primary">{item.name}</p>
+            <p className="text-sm text-text-secondary">${item.price.toFixed(2)}</p>
+        </div>
+        <button onClick={onAdd} className="bg-primary text-white font-bold w-10 h-10 rounded-full text-xl hover:bg-blue-700 transition-transform hover:scale-110">+</button>
     </div>
 );
 
 export const OrderScreen: React.FC = () => {
-    const { menuItems, placeOrder, tables, setActiveScreen, menuCategories } = useAppContext();
-    const [currentOrder, setCurrentOrder] = useState<OrderItem[]>([]);
-    const [selectedCategory, setSelectedCategory] = useState<string>(menuCategories[0] || '');
-    const [selectedTableId, setSelectedTableId] = useState<string>('');
-    const [suggestion, setSuggestion] = useState('');
-    const [isSuggesting, setIsSuggesting] = useState(false);
-    
+    const { menuItems, tables, placeOrder } = useAppContext();
+    const [cart, setCart] = useState<OrderItem[]>([]);
+    const [selectedTableId, setSelectedTableId] = useState<string>('takeout');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('All');
+
     const availableTables = useMemo(() => tables.filter(t => t.status === TableStatus.AVAILABLE), [tables]);
+    const categories = useMemo(() => ['All', ...Array.from(new Set(menuItems.map(item => item.category)))], [menuItems]);
 
-    const addToOrder = (item: MenuItem) => {
-        setCurrentOrder(prevOrder => {
-            const existingItem = prevOrder.find(oi => oi.menuItemId === item.id);
+    const filteredMenuItems = useMemo(() => {
+        return menuItems.filter(item => {
+            const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
+            const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+            return matchesCategory && matchesSearch;
+        });
+    }, [menuItems, searchQuery, selectedCategory]);
+
+    const addToCart = (menuItemId: string) => {
+        setCart(prev => {
+            const existingItem = prev.find(item => item.menuItemId === menuItemId);
             if (existingItem) {
-                return prevOrder.map(oi => oi.menuItemId === item.id ? { ...oi, quantity: oi.quantity + 1 } : oi);
+                return prev.map(item => item.menuItemId === menuItemId ? { ...item, quantity: item.quantity + 1 } : item);
             }
-            return [...prevOrder, { menuItemId: item.id, quantity: 1 }];
+            return [...prev, { menuItemId, quantity: 1 }];
         });
     };
     
-    const removeFromOrder = (itemId: string) => {
-        setCurrentOrder(prev => {
-            const existing = prev.find(oi => oi.menuItemId === itemId);
-            if(existing && existing.quantity > 1) {
-                 return prev.map(oi => oi.menuItemId === itemId ? { ...oi, quantity: oi.quantity - 1 } : oi);
+    const removeFromCart = (menuItemId: string) => {
+        setCart(prev => {
+            const existingItem = prev.find(item => item.menuItemId === menuItemId);
+            if (existingItem && existingItem.quantity > 1) {
+                return prev.map(item => item.menuItemId === menuItemId ? { ...item, quantity: item.quantity - 1 } : item);
             }
-            return prev.filter(oi => oi.menuItemId !== itemId);
+            return prev.filter(item => item.menuItemId !== menuItemId);
         });
     };
 
-    const total = useMemo(() => {
-        return currentOrder.reduce((acc, orderItem) => {
-            const menuItem = menuItems.find(mi => mi.id === orderItem.menuItemId);
-            return acc + (menuItem ? menuItem.price * orderItem.quantity : 0);
+    const cartTotal = useMemo(() => {
+        return cart.reduce((total, cartItem) => {
+            const menuItem = menuItems.find(item => item.id === cartItem.menuItemId);
+            return total + (menuItem ? menuItem.price * cartItem.quantity : 0);
         }, 0);
-    }, [currentOrder, menuItems]);
-    
+    }, [cart, menuItems]);
+
     const handlePlaceOrder = () => {
-        if (currentOrder.length === 0 || !selectedTableId) {
-            alert("Please select a table and add items to the order.");
+        if (cart.length === 0 || !selectedTableId) {
+            alert('Please add items to the cart and select a table or takeout.');
             return;
         }
-        placeOrder(selectedTableId, currentOrder);
-        setCurrentOrder([]);
-        setSelectedTableId('');
-        setSuggestion('');
-        setActiveScreen(Screen.KITCHEN);
+        placeOrder(selectedTableId, cart);
+        setCart([]);
+        setSelectedTableId('takeout');
+        alert('Order placed successfully!');
     };
     
-    const handleGetSuggestion = async () => {
-        if (currentOrder.length === 0) {
-            setSuggestion('Add an item to the order first to get suggestions.');
-            return;
-        }
-        setIsSuggesting(true);
-        const orderedItems = currentOrder.map(oi => menuItems.find(mi => mi.id === oi.menuItemId)).filter(Boolean) as MenuItem[];
-        const result = await getOrderSuggestion(orderedItems);
-        setSuggestion(result);
-        setIsSuggesting(false);
-    }
-    
-    const filteredMenuItems = useMemo(() => menuItems.filter(item => item.category === selectedCategory), [menuItems, selectedCategory]);
-
     return (
-        <div className="flex flex-col lg:flex-row h-[calc(100vh-65px)]">
-            {/* Menu Items */}
-            <div className="flex-1 lg:w-2/3 p-4 flex flex-col">
-                <div className="mb-4">
-                    <h2 className="text-xl font-bold mb-3 text-text-primary">Menu</h2>
-                    <div className="flex space-x-2 overflow-x-auto pb-2">
-                        {menuCategories.map(cat => (
-                            <button key={cat} onClick={() => setSelectedCategory(cat)} className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-colors ${selectedCategory === cat ? 'bg-primary text-white' : 'bg-surface hover:bg-surface-light'}`}>
-                                {cat}
-                            </button>
+        <div className="p-6 h-[calc(100vh-65px)] flex flex-col">
+            <PageTitle title="Create New Order" />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-grow overflow-hidden">
+                {/* Menu Items Section */}
+                <div className="lg:col-span-2 flex flex-col overflow-hidden">
+                    <div className="mb-4 flex flex-col sm:flex-row gap-4">
+                        <input
+                            type="text"
+                            placeholder="Search for food..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="bg-surface border border-slate-600 rounded-lg p-2 flex-grow"
+                        />
+                         <select
+                            value={selectedCategory}
+                            onChange={(e) => setSelectedCategory(e.target.value)}
+                            className="bg-surface border border-slate-600 rounded-lg p-2"
+                        >
+                            {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                        </select>
+                    </div>
+                    <div className="flex-grow overflow-y-auto pr-2 space-y-4">
+                        {filteredMenuItems.map(item => (
+                            <MenuItemCard key={item.id} item={item} onAdd={() => addToCart(item.id)} />
                         ))}
                     </div>
                 </div>
-                <div className="flex-grow overflow-y-auto pr-2">
-                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                        {filteredMenuItems.map(item => <MenuItemCard key={item.id} item={item} onAddToOrder={addToOrder} />)}
-                    </div>
-                </div>
-            </div>
 
-            {/* Current Order */}
-            <div className="w-full lg:w-1/3 bg-surface border-t lg:border-t-0 lg:border-l border-slate-700 p-4 flex flex-col">
-                <h2 className="text-xl font-bold mb-4 text-text-primary">Current Order</h2>
-                <div className="mb-4">
-                    <select value={selectedTableId} onChange={e => setSelectedTableId(e.target.value)} className="w-full p-2 bg-background border border-slate-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
-                        <option value="">Select a Table</option>
-                        {availableTables.map(t => <option key={t.id} value={t.id}>{t.name} ({t.capacity} seats)</option>)}
-                    </select>
-                </div>
-                <div className="flex-grow overflow-y-auto space-y-2 pr-1">
-                    {currentOrder.length === 0 ? (
-                        <p className="text-text-secondary text-center mt-8">No items in order.</p>
-                    ) : (
-                        currentOrder.map(orderItem => {
-                            const menuItem = menuItems.find(mi => mi.id === orderItem.menuItemId);
+                {/* Order Summary Section */}
+                <div className="bg-surface rounded-xl p-6 shadow-lg flex flex-col overflow-hidden">
+                    <h2 className="text-2xl font-bold mb-4 border-b border-slate-700 pb-2">Order Summary</h2>
+                    <div className="mb-4">
+                        <label htmlFor="table-select" className="block text-sm font-medium text-text-secondary mb-1">Order for:</label>
+                        <select 
+                            id="table-select" 
+                            value={selectedTableId} 
+                            onChange={(e) => setSelectedTableId(e.target.value)}
+                            className="w-full bg-background border border-slate-600 rounded-lg p-2"
+                        >
+                            <option value="takeout">Takeout</option>
+                            {availableTables.map(table => (
+                                <option key={table.id} value={table.id}>{table.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="flex-grow overflow-y-auto space-y-3 pr-2">
+                        {cart.length > 0 ? cart.map(cartItem => {
+                            const menuItem = menuItems.find(item => item.id === cartItem.menuItemId);
                             if (!menuItem) return null;
                             return (
-                                <div key={menuItem.id} className="flex justify-between items-center bg-background p-2 rounded-lg">
+                                <div key={menuItem.id} className="flex justify-between items-center">
                                     <div>
-                                        <p className="font-semibold text-text-primary text-sm">{menuItem.name}</p>
-                                        <p className="text-xs text-text-secondary">${menuItem.price.toFixed(2)}</p>
+                                        <p className="font-semibold text-text-primary">{menuItem.name}</p>
+                                        <p className="text-sm text-text-secondary">${menuItem.price.toFixed(2)}</p>
                                     </div>
-                                    <div className="flex items-center space-x-3">
-                                        <button onClick={() => removeFromOrder(menuItem.id)} className="font-bold text-lg w-6 h-6 rounded bg-surface-light">-</button>
-                                        <span className="font-semibold w-4 text-center">{orderItem.quantity}</span>
-                                        <button onClick={() => addToOrder(menuItem)} className="font-bold text-lg w-6 h-6 rounded bg-surface-light">+</button>
+                                    <div className="flex items-center gap-2">
+                                        <button onClick={() => removeFromCart(menuItem.id)} className="bg-slate-600 w-6 h-6 rounded-full font-bold">-</button>
+                                        <span className="w-6 text-center font-bold">{cartItem.quantity}</span>
+                                        <button onClick={() => addToCart(menuItem.id)} className="bg-slate-600 w-6 h-6 rounded-full font-bold">+</button>
                                     </div>
                                 </div>
                             );
-                        })
-                    )}
-                </div>
-                <div className="border-t border-slate-700 pt-4 mt-2">
-                     <div className="bg-background p-3 rounded-lg mb-4">
-                        <button onClick={handleGetSuggestion} disabled={isSuggesting} className="text-sm w-full text-left text-secondary font-semibold disabled:opacity-50 transition-opacity">
-                            {isSuggesting ? "Thinking..." : "✨ Get AI Suggestion"}
+                        }) : <p className="text-text-secondary text-center mt-8">Cart is empty.</p>}
+                    </div>
+                    <div className="border-t border-slate-700 pt-4 mt-4">
+                        <div className="flex justify-between font-bold text-xl mb-4">
+                            <span>Total:</span>
+                            <span>${cartTotal.toFixed(2)}</span>
+                        </div>
+                        <button onClick={handlePlaceOrder} disabled={cart.length === 0} className="w-full bg-secondary text-background font-bold py-3 rounded-lg hover:bg-green-500 transition-all disabled:bg-slate-600 disabled:cursor-not-allowed">
+                            Place Order
                         </button>
-                        {suggestion && <p className="text-xs mt-2 text-text-secondary">{suggestion}</p>}
                     </div>
-                    <div className="flex justify-between font-bold text-xl mb-4 text-text-primary">
-                        <span>Total:</span>
-                        <span>${total.toFixed(2)}</span>
-                    </div>
-                    <button onClick={handlePlaceOrder} disabled={currentOrder.length === 0 || !selectedTableId} className="w-full bg-secondary text-background font-bold py-3 rounded-lg hover:bg-green-500 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed">
-                        Place Order
-                    </button>
                 </div>
             </div>
         </div>

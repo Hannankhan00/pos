@@ -1,15 +1,18 @@
-
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 import type { Order, StockItem, MenuItem } from '../types';
 
-if (!process.env.API_KEY) {
-    console.warn("API_KEY environment variable not set. AI features will be disabled.");
-}
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+// Helper function to safely initialize the AI client only when needed
+const getAIClient = () => {
+    if (process.env.API_KEY) {
+        return new GoogleGenAI({ apiKey: process.env.API_KEY });
+    }
+    console.warn("API_KEY environment variable not set. AI features are disabled.");
+    return null;
+};
 
 export const getBusinessInsights = async (orders: Order[], menuItems: MenuItem[]): Promise<string> => {
-    if (!process.env.API_KEY) return "AI features disabled. Please set your API key.";
+    const ai = getAIClient();
+    if (!ai) return "AI features disabled. Please set your API key in the deployment environment.";
     
     const prompt = `
         Analyze the following restaurant sales data for today and provide a brief, actionable summary in markdown format. 
@@ -36,7 +39,8 @@ export const getBusinessInsights = async (orders: Order[], menuItems: MenuItem[]
 };
 
 export const getMenuDescription = async (itemName: string, category: string): Promise<string> => {
-    if (!process.env.API_KEY) return "";
+    const ai = getAIClient();
+    if (!ai) return "";
     
     const prompt = `Write a short, delicious, and appetizing menu description for a dish named "${itemName}" in the "${category}" category. The description should be one sentence and no more than 20 words.`;
     
@@ -53,7 +57,8 @@ export const getMenuDescription = async (itemName: string, category: string): Pr
 };
 
 export const getReorderSuggestions = async (stock: StockItem[], orders: Order[]): Promise<string> => {
-    if (!process.env.API_KEY) return "AI features disabled.";
+    const ai = getAIClient();
+    if (!ai) return "AI features disabled.";
 
     const prompt = `
         Based on the current inventory levels and a summary of recent sales, create a prioritized reorder list in markdown format.
@@ -78,7 +83,8 @@ export const getReorderSuggestions = async (stock: StockItem[], orders: Order[])
 };
 
 export const getOrderSuggestion = async (currentOrderItems: MenuItem[]): Promise<string> => {
-    if (!process.env.API_KEY) return "AI features disabled.";
+    const ai = getAIClient();
+    if (!ai) return "AI features disabled.";
 
     const prompt = `A customer has the following items in their order: ${currentOrderItems.map(i => i.name).join(', ')}. 
     Suggest one complementary item (an appetizer, drink, or dessert) to enhance their meal.
